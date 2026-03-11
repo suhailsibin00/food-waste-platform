@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Rescue - Waste Management Platform</title>
+    <meta name="description" content="A platform to connect restaurants with surplus food to NGOs for redistribution.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="toast-container"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="app.navigate('home')">
+                <span class="logo-icon">🍲</span>
+                <span class="logo-text">FoodRescue</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" onclick="app.navigate('home')" id="nav-home" class="active">Home</a></li>
+                <li><a href="#" onclick="app.navigate('restaurant')" id="nav-restaurant">Restaurant Portal</a></li>
+                <li><a href="#" onclick="app.navigate('ngo')" id="nav-ngo">NGO Portal</a></li>
+            </ul>
+            <div class="mobile-menu-btn" onclick="app.toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <main id="app-content">
+        <!-- Home Section -->
+        <section id="page-home" class="page-section active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1>Bridge the gap between <span class="highlight">surplus</span> and <span class="highlight">need</span>.</h1>
+                    <p>Connect your restaurant's surplus food with local NGOs to eliminate waste and feed the community.</p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" onclick="app.navigate('restaurant')">I am a Restaurant</button>
+                        <button class="btn btn-secondary" onclick="app.navigate('ngo')">I am an NGO</button>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-section">
+                <div class="stat-card">
+                    <h2 id="stat-meals">12,450</h2>
+                    <p>Meals Rescued</p>
+                </div>
+                <div class="stat-card">
+                    <h2 id="stat-restaurants">145</h2>
+                    <p>Partner Restaurants</p>
+                </div>
+                <div class="stat-card">
+                    <h2 id="stat-ngos">32</h2>
+                    <p>Active NGOs</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Restaurant Dashboard -->
+        <section id="page-restaurant" class="page-section">
+            <div class="container">
+                <header class="section-header">
+                    <h2>Restaurant Portal</h2>
+                    <p>List your perfectly good surplus food for local NGOs to claim.</p>
+                </header>
+
+                <div class="dashboard-grid">
+                    <div class="card glass-card form-card">
+                        <h3>Add Surplus Food</h3>
+                        <form id="add-food-form" onsubmit="app.handleFoodSubmit(event)">
+                            <div class="form-group">
+                                <label for="food-title">Food Description</label>
+                                <input type="text" id="food-title" required placeholder="e.g., 20 Servings of Margharita Pizza">
+                            </div>
+                            <div class="form-group">
+                                <label for="food-quantity">Quantity (Servings/Kg)</label>
+                                <input type="text" id="food-quantity" required placeholder="e.g., 20 Servings">
+                            </div>
+                            <div class="form-group">
+                                <label for="food-expiry">Pickup Deadline</label>
+                                <input type="datetime-local" id="food-expiry" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="food-location">Listing Area</label>
+                                <select id="food-location" required style="width: 100%; padding: 0.75rem 1rem; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); margin-bottom: 1rem;">
+                                    <option value="RSPuram">RS Puram, Coimbatore</option>
+                                    <option value="Gandhipuram">Gandhipuram, Coimbatore</option>
+                                    <option value="Peelamedu">Peelamedu, Coimbatore</option>
+                                    <option value="SaiBabaColony">Sai Baba Colony, Coimbatore</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="food-restaurant-name">Restaurant Name</label>
+                                <input type="text" id="food-restaurant-name" required placeholder="Your Restaurant Name">
+                            </div>
+                            <button type="submit" class="btn btn-primary full-width">List Food</button>
+                        </form>
+                    </div>
+
+                    <div class="card glass-card predictor-card" style="background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); border: 1px solid var(--primary);">
+                        <h3>✨ AI Wastage Predictor</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.9rem;">Not sure how much food to prepare? Let our ML model predict potential wastage based on your event details.</p>
+                        <form id="predict-waste-form" onsubmit="app.handlePredictSubmit(event)">
+                            <div class="form-group">
+                                <label for="pred-food-type">Type of Food</label>
+                                <select id="pred-food-type" required style="width: 100%; padding: 0.75rem 1rem; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary);">
+                                    <option value="Meat">Meat</option>
+                                    <option value="Vegetables">Vegetables</option>
+                                    <option value="Fruits">Fruits</option>
+                                    <option value="Baked Goods">Baked Goods</option>
+                                    <option value="Dairy Products">Dairy Products</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="pred-guests">Expected Number of Guests</label>
+                                <input type="number" id="pred-guests" required placeholder="e.g., 200">
+                            </div>
+                            <div class="form-group">
+                                <label for="pred-quantity">Prepared Quantity (Servings/Kg)</label>
+                                <input type="number" id="pred-quantity" required placeholder="e.g., 250">
+                            </div>
+                            <div class="form-group" style="display: flex; gap: 1rem;">
+                                <div style="flex: 1;">
+                                    <label for="pred-event">Event Type</label>
+                                    <select id="pred-event" style="width: 100%; padding: 0.75rem 1rem; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary);">
+                                        <option value="Corporate">Corporate</option>
+                                        <option value="Wedding">Wedding</option>
+                                        <option value="Birthday">Birthday</option>
+                                        <option value="Social Gathering">Social Gathering</option>
+                                    </select>
+                                </div>
+                                <div style="flex: 1;">
+                                    <label for="pred-season">Seasonality</label>
+                                    <select id="pred-season" style="width: 100%; padding: 0.75rem 1rem; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary);">
+                                        <option value="Summer">Summer</option>
+                                        <option value="Winter">Winter</option>
+                                        <option value="All Seasons">All Seasons</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-secondary full-width" id="btn-predict" style="border-color: var(--primary); color: var(--primary);">Run AI Prediction</button>
+                        </form>
+                        
+                        <div id="prediction-result" style="display: none; margin-top: 1.5rem; padding: 1rem; border-radius: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--primary); text-align: center;">
+                            <p style="font-size: 0.9rem; color: var(--text-secondary);">Predicted Potential Wastage:</p>
+                            <h2 style="color: var(--primary); font-size: 2rem; margin: 0.5rem 0;" id="pred-amount">--</h2>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);" id="pred-helper-text"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="card glass-card list-card" style="grid-column: 1 / -1; max-height: 400px; order: 3;">
+                        <h3>Your Active Listings</h3>
+                        <div id="restaurant-listings" class="items-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NGO Dashboard -->
+        <section id="page-ngo" class="page-section">
+            <div class="container">
+                <header class="section-header">
+                    <h2>NGO Portal</h2>
+                    <p>Find and claim available surplus food near you.</p>
+                </header>
+
+                <div class="dashboard-grid ngo-grid">
+                    <div class="card glass-card map-card">
+                        <h3>Available Food Map</h3>
+                        <div id="food-map" class="map-container"></div>
+                    </div>
+
+                    <div class="card glass-card feed-card">
+                        <h3>Food Feed</h3>
+                        <div class="filter-bar" style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                            <input type="text" id="food-search" placeholder="Search food..." onkeyup="app.filterFeed()" style="flex: 2;">
+                            <select id="ngo-location-filter" onchange="app.changeMapLocation()" style="flex: 1; padding: 0.75rem 1rem; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary);">
+                                <option value="All">All of Coimbatore</option>
+                                <option value="RSPuram">RS Puram</option>
+                                <option value="Gandhipuram">Gandhipuram</option>
+                                <option value="Peelamedu">Peelamedu</option>
+                                <option value="SaiBabaColony">Sai Baba Colony</option>
+                            </select>
+                        </div>
+                        <div id="ngo-feed" class="items-list feed-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
