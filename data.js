@@ -35,6 +35,8 @@ const INITIAL_FOOD_ITEMS = [
         lat: 11.0289,
         lng: 77.0025,
         locationArea: 'Peelamedu',
+        createdAt: new Date(Date.now() - 3600000).toISOString()
+    },
     {
         id: 'f4',
         title: '30 Parottas with Salna',

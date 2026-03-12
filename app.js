@@ -145,7 +145,7 @@ class App {
         };
 
         try {
-            const response = await fetch('http://localhost:8001/predict', {
+            const response = await fetch('/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -380,6 +380,11 @@ class App {
             toast.style.animation = 'fadeOut 0.3s forwards';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
+    }
+
+    toggleMobileMenu() {
+        const navLinks = document.querySelector('.nav-links');
+        navLinks.classList.toggle('mobile-active');
     }
 }
 
